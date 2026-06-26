@@ -1,3 +1,4 @@
+using System;
 using UnityFoundation.Core;
 
 namespace UnityFoundation.Services
@@ -7,5 +8,6 @@ namespace UnityFoundation.Services
         void Log(string message);
         void LogWarning(string message);
         void LogError(string message);
+        void LogException(Exception e);
     }
 }
