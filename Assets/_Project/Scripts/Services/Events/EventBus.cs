@@ -11,10 +11,15 @@ namespace UnityFoundation.Services
         public InitPriority Priority => InitPriority.Critical;
         public bool IsReady { get; private set; }
 
-        public void Initialize() => IsReady = true;
+        public void Initialize()
+        {
+            IsReady = true;
+            "[Lifecycle] EventBus initialized".Log(LogCategory.Lifecycle);
+        }
 
         public void Dispose()
         {
+            "[Lifecycle] EventBus disposed".Log(LogCategory.Lifecycle);
             _handlers.Clear();
             IsReady = false;
         }

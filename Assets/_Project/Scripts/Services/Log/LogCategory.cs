@@ -8,6 +8,7 @@ namespace UnityFoundation.Services
         Data,
         GameState,
         Bootstrap,
-        Event
+        Event,
+        Lifecycle
     }
 }

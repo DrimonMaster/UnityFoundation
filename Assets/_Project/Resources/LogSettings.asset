@@ -41,3 +41,7 @@ MonoBehaviour:
     EnabledInEditor: 1
     EnabledInBuild: 1
     Color: {r: 1, g: 0, b: 0, a: 1}
+  - Category: 7
+    EnabledInEditor: 1
+    EnabledInBuild: 1
+    Color: {r: 0.2, g: 1, b: 0.2, a: 1}

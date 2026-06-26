@@ -15,15 +15,19 @@ namespace UnityFoundation.Services
         public void Initialize()
         {
             IsReady = true;
+            if (_pending.Count > 0)
+                $"[Lifecycle] CrashReporter draining {_pending.Count} pending reports".Log(LogCategory.Lifecycle);
             while (_pending.Count > 0)
             {
                 var (e, ctx) = _pending.Dequeue();
                 SendToBackend(e, ctx);
             }
+            "[Lifecycle] CrashReporter initialized".Log(LogCategory.Lifecycle);
         }
 
         public void Dispose()
         {
+            "[Lifecycle] CrashReporter disposed".Log(LogCategory.Lifecycle);
             _pending.Clear();
             IsReady = false;
         }

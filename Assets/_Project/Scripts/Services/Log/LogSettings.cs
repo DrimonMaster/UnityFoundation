@@ -63,6 +63,7 @@ namespace UnityFoundation.Services
                 { LogCategory.GameState, Color.magenta                },
                 { LogCategory.Bootstrap, new Color(1f, 0.5f, 0f)     }, // orange
                 { LogCategory.Event,     Color.red                    },
+                { LogCategory.Lifecycle, new Color(0.2f, 1f, 0.2f)   }, // lime green
             };
 
             foreach (LogCategory cat in Enum.GetValues(typeof(LogCategory)))

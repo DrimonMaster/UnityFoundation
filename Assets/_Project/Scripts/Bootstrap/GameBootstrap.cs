@@ -17,9 +17,13 @@ namespace UnityFoundation.Bootstrap
         {
             try
             {
+                "Registering services...".Log(LogCategory.Bootstrap);
                 RegisterServices();
+                "Initializing all services...".Log(LogCategory.Bootstrap);
                 InitializeAll();
+                "Starting async sequence...".Log(LogCategory.Bootstrap);
                 await RunStartupSequence();
+                "Loading MainMenu...".Log(LogCategory.Bootstrap);
                 SceneManager.LoadScene("MainMenu");
             }
             catch (Exception e)
@@ -65,6 +69,8 @@ namespace UnityFoundation.Bootstrap
             await Task.WhenAll(asyncTasks
                 .Where(kv => kv.Key.Priority == InitPriority.Critical)
                 .Select(kv => kv.Value));
+
+            "All critical services ready".Log(LogCategory.Bootstrap);
 
             // Show loader while Important services finish
             ServiceLocator.Get<ILoadingService>().Show();

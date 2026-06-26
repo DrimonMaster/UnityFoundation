@@ -18,8 +18,17 @@ namespace UnityFoundation.Services
         public InitPriority Priority => InitPriority.Critical;
         public bool IsReady { get; private set; }
 
-        public void Initialize() => IsReady = true;
-        public void Dispose() => IsReady = false;
+        public void Initialize()
+        {
+            IsReady = true;
+            "[Lifecycle] LogService initialized".Log(LogCategory.Lifecycle);
+        }
+
+        public void Dispose()
+        {
+            "[Lifecycle] LogService disposed".Log(LogCategory.Lifecycle);
+            IsReady = false;
+        }
 
         public void Log(string message, LogCategory category = LogCategory.Core)
         {

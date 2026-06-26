@@ -14,9 +14,14 @@ namespace UnityFoundation.Services
         {
             CurrentState = GameState.Menu;
             IsReady = true;
+            "[Lifecycle] GameStateManager initialized".Log(LogCategory.Lifecycle);
         }
 
-        public void Dispose() => IsReady = false;
+        public void Dispose()
+        {
+            "[Lifecycle] GameStateManager disposed".Log(LogCategory.Lifecycle);
+            IsReady = false;
+        }
 
         public void TransitionTo(GameState state)
         {

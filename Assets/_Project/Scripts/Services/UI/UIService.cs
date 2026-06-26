@@ -10,10 +10,15 @@ namespace UnityFoundation.Services
         public InitPriority Priority => InitPriority.Critical;
         public bool IsReady { get; private set; }
 
-        public void Initialize() => IsReady = true;
+        public void Initialize()
+        {
+            IsReady = true;
+            "[Lifecycle] UIService initialized".Log(LogCategory.Lifecycle);
+        }
 
         public void Dispose()
         {
+            "[Lifecycle] UIService disposed".Log(LogCategory.Lifecycle);
             _screenStack.Clear();
             IsReady = false;
         }

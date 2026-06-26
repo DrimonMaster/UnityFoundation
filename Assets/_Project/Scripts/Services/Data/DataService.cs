@@ -11,17 +11,23 @@ namespace UnityFoundation.Services
         public InitPriority Priority => InitPriority.Critical;
         public bool IsReady { get; private set; }
 
-        public void Initialize() { }
+        public void Initialize()
+        {
+            "[Lifecycle] DataService initialized".Log(LogCategory.Lifecycle);
+        }
 
         public async Task StartAsync()
         {
+            "[Lifecycle] DataService loading data...".Log(LogCategory.Lifecycle);
             // TODO: deserialize save file from disk into _cache
             await Task.CompletedTask;
             IsReady = true;
+            "[Lifecycle] DataService ready".Log(LogCategory.Lifecycle);
         }
 
         public void Dispose()
         {
+            "[Lifecycle] DataService disposed".Log(LogCategory.Lifecycle);
             _cache.Clear();
             IsReady = false;
         }
