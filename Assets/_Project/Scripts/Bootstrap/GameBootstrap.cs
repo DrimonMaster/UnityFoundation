@@ -20,7 +20,7 @@ namespace UnityFoundation.Bootstrap
                 RegisterServices();
                 InitializeAll();
                 await RunStartupSequence();
-                SceneManager.LoadScene("MainMenu");
+                SceneManager.LoadScene("SampleScene");
             }
             catch (Exception e)
             {
@@ -44,7 +44,7 @@ namespace UnityFoundation.Bootstrap
 
         private void Add<T>(T service) where T : IService
         {
-            ServiceLocator.Register<T>(service);
+            ServiceLocator.Register(service);
             _services.Add(service);
         }
 
