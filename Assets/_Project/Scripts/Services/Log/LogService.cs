@@ -24,19 +24,19 @@ namespace UnityFoundation.Services
         public void Log(string message, LogCategory category = LogCategory.Core)
         {
             if (!IsEnabled(category)) return;
-            Debug.Log($"[LOG] {message}");
+            Debug.Log(Format(message, category));
         }
 
         public void LogWarning(string message, LogCategory category = LogCategory.Core)
         {
             if (!IsEnabled(category)) return;
-            Debug.LogWarning($"[WARN] {message}");
+            Debug.LogWarning(Format(message, category));
         }
 
         public void LogError(string message, LogCategory category = LogCategory.Core)
         {
             if (!IsEnabled(category)) return;
-            Debug.LogError($"[ERROR] {message}");
+            Debug.LogError(Format(message, category));
             _crashReporter.Report(new Exception(message));
         }
 
@@ -48,5 +48,8 @@ namespace UnityFoundation.Services
 
         private bool IsEnabled(LogCategory category) =>
             _settings == null || _settings.IsEnabled(category);
+
+        private string Format(string message, LogCategory category) =>
+            _settings != null ? _settings.BuildMessage(message, category) : $"[{category}] {message}";
     }
 }

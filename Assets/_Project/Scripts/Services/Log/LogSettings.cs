@@ -11,8 +11,9 @@ namespace UnityFoundation.Services
         public class CategorySettings
         {
             public LogCategory Category;
-            public bool EnabledInEditor = true;
-            public bool EnabledInBuild  = true;
+            public bool  EnabledInEditor = true;
+            public bool  EnabledInBuild  = true;
+            public Color Color           = Color.white;
         }
 
         [SerializeField] private List<CategorySettings> _categories = new();
@@ -41,10 +42,34 @@ namespace UnityFoundation.Services
 #endif
         }
 
+        public string BuildMessage(object message, LogCategory category)
+        {
+            if (_lookup == null) BuildLookup();
+            if (!_lookup.TryGetValue(category, out var s))
+                return $"[{category}] {message}";
+
+            var hex = ColorUtility.ToHtmlStringRGB(s.Color);
+            return $"<color=#{hex}><b>[{category}]</b></color> {message}";
+        }
+
         private void PopulateDefaults()
         {
+            var colors = new Dictionary<LogCategory, Color>
+            {
+                { LogCategory.Core,      Color.white                  },
+                { LogCategory.UI,        Color.cyan                   },
+                { LogCategory.Network,   Color.yellow                 },
+                { LogCategory.Data,      Color.green                  },
+                { LogCategory.GameState, Color.magenta                },
+                { LogCategory.Bootstrap, new Color(1f, 0.5f, 0f)     }, // orange
+                { LogCategory.Event,     Color.red                    },
+            };
+
             foreach (LogCategory cat in Enum.GetValues(typeof(LogCategory)))
-                _categories.Add(new CategorySettings { Category = cat });
+            {
+                var color = colors.TryGetValue(cat, out var c) ? c : Color.white;
+                _categories.Add(new CategorySettings { Category = cat, Color = color });
+            }
         }
 
         private void BuildLookup()
