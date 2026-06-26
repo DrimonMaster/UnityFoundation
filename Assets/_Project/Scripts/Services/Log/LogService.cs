@@ -35,14 +35,14 @@ namespace UnityFoundation.Services
 
         public void LogError(string message, LogCategory category = LogCategory.Core)
         {
-            _crashReporter.Report(new Exception(message));
             if (!IsEnabled(category)) return;
             Debug.LogError($"[ERROR] {message}");
+            _crashReporter.Report(new Exception(message));
         }
 
         public void LogException(Exception e, LogCategory category = LogCategory.Core)
         {
-            // CrashReporter.Report handles dev-build console output via Debug.LogException
+            if (!IsEnabled(category)) return;
             _crashReporter.Report(e, e.TargetSite?.Name);
         }
 

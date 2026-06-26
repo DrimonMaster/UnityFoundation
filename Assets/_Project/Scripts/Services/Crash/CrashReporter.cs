@@ -35,9 +35,6 @@ namespace UnityFoundation.Services
                 _pending.Enqueue((e, context));
                 return;
             }
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            Debug.LogException(e);
-#endif
             SendToBackend(e, context);
         }
 
