@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityFoundation.Core;
 
@@ -6,31 +7,43 @@ namespace UnityFoundation.Services
 {
     public class CrashReporter : ICrashReporter
     {
+        private readonly Queue<(Exception e, string context)> _pending = new();
+
         public InitPriority Priority => InitPriority.Critical;
         public bool IsReady { get; private set; }
 
         public void Initialize()
         {
-            Application.logMessageReceived += OnLogMessage;
             IsReady = true;
+            while (_pending.Count > 0)
+            {
+                var (e, ctx) = _pending.Dequeue();
+                SendToBackend(e, ctx);
+            }
         }
 
         public void Dispose()
         {
-            Application.logMessageReceived -= OnLogMessage;
+            _pending.Clear();
             IsReady = false;
         }
 
-        public void Report(Exception exception, string context = null)
+        public void Report(Exception e, string context = null)
         {
-            // TODO: forward to analytics / crash backend
-            Debug.LogError($"[CrashReporter] {context}: {exception}");
+            if (!IsReady)
+            {
+                _pending.Enqueue((e, context));
+                return;
+            }
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            Debug.LogException(e);
+#endif
+            SendToBackend(e, context);
         }
 
-        private void OnLogMessage(string condition, string stackTrace, LogType type)
+        private static void SendToBackend(Exception e, string context)
         {
-            if (type == LogType.Exception)
-                Report(new Exception(condition), stackTrace);
+            // TODO: Datadog / crash analytics
         }
     }
 }

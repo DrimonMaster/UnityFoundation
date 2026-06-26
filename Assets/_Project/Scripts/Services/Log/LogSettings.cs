@@ -12,7 +12,7 @@ namespace UnityFoundation.Services
         {
             public LogCategory Category;
             public bool EnabledInEditor = true;
-            public bool EnabledInBuild  = false;
+            public bool EnabledInBuild  = true;
         }
 
         [SerializeField] private List<CategorySettings> _categories = new();

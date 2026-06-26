@@ -7,8 +7,13 @@ namespace UnityFoundation.Services
     public class LogService : ILogService
     {
         private readonly LogSettings _settings;
+        private readonly ICrashReporter _crashReporter;
 
-        public LogService(LogSettings settings) => _settings = settings;
+        public LogService()
+        {
+            _settings = Resources.Load<LogSettings>("LogSettings");
+            _crashReporter = ServiceLocator.Get<ICrashReporter>();
+        }
 
         public InitPriority Priority => InitPriority.Critical;
         public bool IsReady { get; private set; }
@@ -30,21 +35,17 @@ namespace UnityFoundation.Services
 
         public void LogError(string message, LogCategory category = LogCategory.Core)
         {
+            _crashReporter.Report(new Exception(message));
             if (!IsEnabled(category)) return;
             Debug.LogError($"[ERROR] {message}");
-            if (ServiceLocator.TryGet<ICrashReporter>(out var reporter))
-                reporter.Report(new Exception(message));
         }
 
         public void LogException(Exception e, LogCategory category = LogCategory.Core)
         {
-            if (!IsEnabled(category)) return;
-            Debug.LogException(e);
-            if (ServiceLocator.TryGet<ICrashReporter>(out var reporter))
-                reporter.Report(e, context: e.TargetSite?.Name);
+            // CrashReporter.Report handles dev-build console output via Debug.LogException
+            _crashReporter.Report(e, e.TargetSite?.Name);
         }
 
-        // null settings = log everything (before asset is created in Editor)
         private bool IsEnabled(LogCategory category) =>
             _settings == null || _settings.IsEnabled(category);
     }
