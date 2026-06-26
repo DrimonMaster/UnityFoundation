@@ -5,9 +5,9 @@ namespace UnityFoundation.Services
 {
     public interface ILogService : IService
     {
-        void Log(string message);
-        void LogWarning(string message);
-        void LogError(string message);
-        void LogException(Exception e);
+        void Log(string message, LogCategory category = LogCategory.Core);
+        void LogWarning(string message, LogCategory category = LogCategory.Core);
+        void LogError(string message, LogCategory category = LogCategory.Core);
+        void LogException(Exception e, LogCategory category = LogCategory.Core);
     }
 }

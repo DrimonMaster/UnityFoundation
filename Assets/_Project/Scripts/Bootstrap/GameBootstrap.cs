@@ -32,7 +32,8 @@ namespace UnityFoundation.Bootstrap
 
         private void RegisterServices()
         {
-            Add<ILogService>(new LogService());
+            var logSettings = Resources.Load<LogSettings>("LogSettings");
+            Add<ILogService>(new LogService(logSettings));
             Add<ICrashReporter>(new CrashReporter());
             Add<IEventBus>(new EventBus());
             Add<IDataService>(new DataService());
