@@ -8,13 +8,6 @@ namespace UnityFoundation.Bootstrap
     {
         private void Awake()
         {
-            var cameraGO = new GameObject("Main Camera");
-            cameraGO.tag = "MainCamera";
-            var cam = cameraGO.AddComponent<Camera>();
-            cam.clearFlags = CameraClearFlags.SolidColor;
-            cam.backgroundColor = Color.black;
-            cameraGO.AddComponent<AudioListener>();
-
             var canvasGO = new GameObject("MenuCanvas");
 
             var canvas = canvasGO.AddComponent<Canvas>();
