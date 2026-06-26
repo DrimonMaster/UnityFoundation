@@ -1,8 +1,8 @@
 using System;
 using System.Diagnostics;
-using UnityFoundation.Services;
+using UnityFoundation.Core;
 
-namespace UnityFoundation.Core
+namespace UnityFoundation.Services
 {
     public static class LogExtensions
     {

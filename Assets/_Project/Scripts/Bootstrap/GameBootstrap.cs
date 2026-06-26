@@ -20,7 +20,7 @@ namespace UnityFoundation.Bootstrap
                 RegisterServices();
                 InitializeAll();
                 await RunStartupSequence();
-                SceneManager.LoadScene("SampleScene");
+                SceneManager.LoadScene("MainMenu");
             }
             catch (Exception e)
             {
