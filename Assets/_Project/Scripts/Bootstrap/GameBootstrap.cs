@@ -23,6 +23,7 @@ namespace UnityFoundation.Bootstrap
                 InitializeAll();
                 "Starting async sequence...".Log(LogCategory.Bootstrap);
                 await RunStartupSequence();
+                ServiceLocator.Get<IGameStateManager>().TransitionTo(GameState.MainMenu);
                 "Loading MainMenu...".Log(LogCategory.Bootstrap);
                 SceneManager.LoadScene("MainMenu");
             }

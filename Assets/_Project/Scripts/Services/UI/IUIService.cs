@@ -1,11 +1,14 @@
+using UnityEngine;
 using UnityFoundation.Core;
 
 namespace UnityFoundation.Services
 {
     public interface IUIService : IService
     {
-        void Push(string screenId);
+        void Show<T>() where T : MonoBehaviour, IScreen;
+        void Hide<T>() where T : MonoBehaviour, IScreen;
+        void Push<T>() where T : MonoBehaviour, IScreen;
         void Pop();
-        void Replace(string screenId);
+        void Replace<T>() where T : MonoBehaviour, IScreen;
     }
 }
