@@ -834,7 +834,9 @@ PlayerSettings:
   webEnableSubmoduleStrippingCompatibility: 0
   scriptingDefineSymbols:
     Android: ENABLE_LOG
+    iPhone: ENABLE_LOG
     Standalone: ENABLE_LOG
+    WebGL: ENABLE_LOG
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
