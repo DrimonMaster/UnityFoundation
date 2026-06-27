@@ -23,14 +23,21 @@ namespace UnityFoundation.Bootstrap
                 InitializeAll();
                 "Starting async sequence...".Log(LogCategory.Bootstrap);
                 await RunStartupSequence();
-                ServiceLocator.Get<IGameStateManager>().TransitionTo(GameState.MainMenu);
                 "Loading MainMenu...".Log(LogCategory.Bootstrap);
+                SceneManager.sceneLoaded += OnSceneLoaded;
                 SceneManager.LoadScene("MainMenu");
             }
             catch (Exception e)
             {
                 Debug.LogException(e);
             }
+        }
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if (scene.name != "MainMenu") return;
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+            ServiceLocator.Get<IGameStateManager>().TransitionTo(GameState.MainMenu);
         }
 
         private void OnDestroy() => ServiceLocator.Clear();
