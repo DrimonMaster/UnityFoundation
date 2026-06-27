@@ -1,0 +1,25 @@
+{
+    "name": "UnityFoundation.Tests.EditMode",
+    "rootNamespace": "UnityFoundation.Tests",
+    "references": [
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "GUID:a1b1c1d1e1f1a2b2c2d2e2f2a3b3c3d3",
+        "GUID:a4b4c4d4e4f4a5b5c5d5e5f5a6b6c6d6"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
