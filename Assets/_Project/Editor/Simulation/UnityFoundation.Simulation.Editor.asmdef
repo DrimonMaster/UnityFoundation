@@ -1,0 +1,20 @@
+{
+    "name": "UnityFoundation.Simulation.Editor",
+    "rootNamespace": "UnityFoundation.Editor",
+    "references": [
+        "UnityFoundation.Simulation"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "HEADLESS_SIM"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

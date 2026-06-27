@@ -1,0 +1,19 @@
+{
+    "name": "UnityFoundation.Simulation",
+    "rootNamespace": "UnityFoundation.Simulation",
+    "references": [
+        "GUID:a1b1c1d1e1f1a2b2c2d2e2f2a3b3c3d3",
+        "GUID:a4b4c4d4e4f4a5b5c5d5e5f5a6b6c6d6"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "HEADLESS_SIM"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
