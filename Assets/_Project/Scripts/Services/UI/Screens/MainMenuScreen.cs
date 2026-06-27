@@ -5,6 +5,8 @@ namespace UnityFoundation.Services
 {
     public class MainMenuScreen : MonoBehaviour, IScreen
     {
+        public ScreenLayer Layer => ScreenLayer.Base;
+
         private void Awake()
         {
             var textGO = new GameObject("Label", typeof(RectTransform));

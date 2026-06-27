@@ -20,7 +20,16 @@ namespace UnityFoundation.Services
             IsReady = false;
         }
 
-        public void Show() => IsVisible = true;  // TODO: animate in loading screen
-        public void Hide() => IsVisible = false; // TODO: animate out loading screen
+        public void Show()
+        {
+            IsVisible = true;
+            ServiceLocator.Get<IUIService>().Show<LoadingScreen>();
+        }
+
+        public void Hide()
+        {
+            IsVisible = false;
+            ServiceLocator.Get<IUIService>().Hide<LoadingScreen>();
+        }
     }
 }

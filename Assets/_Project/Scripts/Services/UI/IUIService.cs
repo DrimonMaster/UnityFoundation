@@ -10,5 +10,6 @@ namespace UnityFoundation.Services
         void Push<T>() where T : MonoBehaviour, IScreen;
         void Pop();
         void Replace<T>() where T : MonoBehaviour, IScreen;
+        void HideAll();
     }
 }

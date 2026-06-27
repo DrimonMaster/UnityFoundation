@@ -5,6 +5,8 @@ namespace UnityFoundation.Services
 {
     public class PauseScreen : MonoBehaviour, IScreen
     {
+        public ScreenLayer Layer => ScreenLayer.Overlay;
+
         private void Awake()
         {
             var textGO = new GameObject("Label", typeof(RectTransform));

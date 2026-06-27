@@ -8,9 +8,12 @@ namespace UnityFoundation.Services
 {
     public class UIService : IUIService
     {
-        private readonly Stack<IScreen> _screenStack = new();
+        private readonly Stack<IScreen> _baseStack = new();
+        private readonly Stack<IScreen> _overlayStack = new();
+        private readonly List<IScreen> _hudScreens = new();
+        private readonly List<IScreen> _systemScreens = new();
         private readonly Dictionary<Type, IScreen> _screens = new();
-        private Canvas _canvas;
+        private readonly Dictionary<ScreenLayer, Canvas> _canvases = new();
         private IDisposable _eventSub;
 
         public InitPriority Priority => InitPriority.Critical;
@@ -18,7 +21,11 @@ namespace UnityFoundation.Services
 
         public void Initialize()
         {
-            _canvas = CreateCanvas();
+            _canvases[ScreenLayer.Base]    = CreateCanvas("Canvas_Base",    0);
+            _canvases[ScreenLayer.Overlay] = CreateCanvas("Canvas_Overlay", 10);
+            _canvases[ScreenLayer.HUD]     = CreateCanvas("Canvas_HUD",     20);
+            _canvases[ScreenLayer.System]  = CreateCanvas("Canvas_System",  30);
+
             _eventSub = ServiceLocator.Get<IEventBus>().Subscribe<GameStateChangedEvent>(OnGameStateChanged);
             IsReady = true;
             "[Lifecycle] UIService initialized".Log(LogCategory.Lifecycle);
@@ -28,7 +35,10 @@ namespace UnityFoundation.Services
         {
             _eventSub?.Dispose();
             "[Lifecycle] UIService disposed".Log(LogCategory.Lifecycle);
-            _screenStack.Clear();
+            _baseStack.Clear();
+            _overlayStack.Clear();
+            _hudScreens.Clear();
+            _systemScreens.Clear();
             _screens.Clear();
             IsReady = false;
         }
@@ -36,73 +46,84 @@ namespace UnityFoundation.Services
         public void Show<T>() where T : MonoBehaviour, IScreen
         {
             var screen = GetOrCreate<T>();
-            ((MonoBehaviour)screen).gameObject.SetActive(true);
-            screen.OnShow();
-            $"[UI] Show {typeof(T).Name}".Log(LogCategory.UI);
+            switch (screen.Layer)
+            {
+                case ScreenLayer.Base:
+                    ClearStack(_baseStack);
+                    Activate(screen);
+                    _baseStack.Push(screen);
+                    break;
+                case ScreenLayer.Overlay:
+                    Activate(screen);
+                    _overlayStack.Push(screen);
+                    break;
+                case ScreenLayer.HUD:
+                    if (!_hudScreens.Contains(screen)) _hudScreens.Add(screen);
+                    Activate(screen);
+                    break;
+                case ScreenLayer.System:
+                    if (!_systemScreens.Contains(screen)) _systemScreens.Add(screen);
+                    Activate(screen);
+                    break;
+            }
+            $"[UI] Show {typeof(T).Name} ({screen.Layer})".Log(LogCategory.UI);
         }
 
         public void Hide<T>() where T : MonoBehaviour, IScreen
         {
             var type = typeof(T);
             if (!_screens.TryGetValue(type, out var screen)) return;
-            screen.OnHide();
-            ((MonoBehaviour)screen).gameObject.SetActive(false);
+            Deactivate(screen);
+            switch (screen.Layer)
+            {
+                case ScreenLayer.Base:    RemoveFromStack(_baseStack, screen); break;
+                case ScreenLayer.Overlay: RemoveFromStack(_overlayStack, screen); break;
+                case ScreenLayer.HUD:     _hudScreens.Remove(screen); break;
+                case ScreenLayer.System:  _systemScreens.Remove(screen); break;
+            }
             $"[UI] Hide {type.Name}".Log(LogCategory.UI);
         }
 
         public void Push<T>() where T : MonoBehaviour, IScreen
         {
-            if (_screenStack.Count > 0)
-            {
-                var top = _screenStack.Peek();
-                top.OnHide();
-                ((MonoBehaviour)top).gameObject.SetActive(false);
-            }
             var screen = GetOrCreate<T>();
-            ((MonoBehaviour)screen).gameObject.SetActive(true);
-            screen.OnShow();
-            _screenStack.Push(screen);
-            $"[UI] Push {typeof(T).Name} (depth: {_screenStack.Count})".Log(LogCategory.UI);
+            Activate(screen);
+            _overlayStack.Push(screen);
+            $"[UI] Push {typeof(T).Name} (overlay depth: {_overlayStack.Count})".Log(LogCategory.UI);
         }
 
         public void Pop()
         {
-            if (_screenStack.Count == 0) return;
-            var current = _screenStack.Pop();
-            current.OnHide();
-            ((MonoBehaviour)current).gameObject.SetActive(false);
-            $"[UI] Pop {current.GetType().Name} (depth: {_screenStack.Count})".Log(LogCategory.UI);
-            if (_screenStack.Count > 0)
-            {
-                var top = _screenStack.Peek();
-                ((MonoBehaviour)top).gameObject.SetActive(true);
-                top.OnShow();
-            }
+            if (_overlayStack.Count == 0) return;
+            var current = _overlayStack.Pop();
+            Deactivate(current);
+            $"[UI] Pop {current.GetType().Name} (overlay depth: {_overlayStack.Count})".Log(LogCategory.UI);
         }
 
         public void Replace<T>() where T : MonoBehaviour, IScreen
         {
-            if (_screenStack.Count > 0)
-            {
-                var current = _screenStack.Pop();
-                current.OnHide();
-                ((MonoBehaviour)current).gameObject.SetActive(false);
-            }
+            ClearStack(_baseStack);
             var screen = GetOrCreate<T>();
-            ((MonoBehaviour)screen).gameObject.SetActive(true);
-            screen.OnShow();
-            _screenStack.Push(screen);
-            $"[UI] Replace → {typeof(T).Name}".Log(LogCategory.UI);
+            Activate(screen);
+            _baseStack.Push(screen);
+            $"[UI] Replace (Base) → {typeof(T).Name}".Log(LogCategory.UI);
+        }
+
+        public void HideAll()
+        {
+            ClearStack(_overlayStack);
+            ClearStack(_baseStack);
+            "[UI] HideAll — Base + Overlay cleared".Log(LogCategory.UI);
         }
 
         private void OnGameStateChanged(GameStateChangedEvent evt)
         {
             switch (evt.To)
             {
-                case GameState.MainMenu:  Push<MainMenuScreen>(); break;
+                case GameState.MainMenu:  Replace<MainMenuScreen>(); break;
+                case GameState.Gameplay:  Replace<MainMenuScreen>(); Show<HUDScreen>(); break;
                 case GameState.Paused:    Push<PauseScreen>(); break;
-                case GameState.GameOver:  Replace<GameOverScreen>(); break;
-                case GameState.Gameplay:  Pop(); break;
+                case GameState.GameOver:  Push<GameOverScreen>(); break;
             }
         }
 
@@ -116,33 +137,61 @@ namespace UnityFoundation.Services
             GameObject go;
             if (prefab != null)
             {
-                go = UnityEngine.Object.Instantiate(prefab, _canvas.transform);
+                go = UnityEngine.Object.Instantiate(prefab);
+                go.SetActive(false);
             }
             else
             {
                 go = new GameObject(type.Name, typeof(RectTransform));
-                go.transform.SetParent(_canvas.transform, false);
-                var rt = (RectTransform)go.transform;
-                rt.anchorMin = Vector2.zero;
-                rt.anchorMax = Vector2.one;
-                rt.offsetMin = Vector2.zero;
-                rt.offsetMax = Vector2.zero;
                 go.AddComponent<T>();
             }
 
             var screen = go.GetComponent<IScreen>();
+            go.transform.SetParent(_canvases[screen.Layer].transform, false);
+            var rt = go.GetComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
             go.SetActive(false);
+
             _screens[type] = screen;
             return screen;
         }
 
-        private static Canvas CreateCanvas()
+        private static void Activate(IScreen screen)
         {
-            var go = new GameObject("UICanvas");
+            ((MonoBehaviour)screen).gameObject.SetActive(true);
+            screen.OnShow();
+        }
+
+        private static void Deactivate(IScreen screen)
+        {
+            screen.OnHide();
+            ((MonoBehaviour)screen).gameObject.SetActive(false);
+        }
+
+        private static void ClearStack(Stack<IScreen> stack)
+        {
+            while (stack.Count > 0)
+                Deactivate(stack.Pop());
+        }
+
+        private static void RemoveFromStack(Stack<IScreen> stack, IScreen target)
+        {
+            var items = stack.ToArray(); // top-first
+            stack.Clear();
+            for (var i = items.Length - 1; i >= 0; i--)
+                if (items[i] != target) stack.Push(items[i]);
+        }
+
+        private static Canvas CreateCanvas(string name, int sortingOrder)
+        {
+            var go = new GameObject(name);
             UnityEngine.Object.DontDestroyOnLoad(go);
             var canvas = go.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 100;
+            canvas.sortingOrder = sortingOrder;
             var scaler = go.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920, 1080);
