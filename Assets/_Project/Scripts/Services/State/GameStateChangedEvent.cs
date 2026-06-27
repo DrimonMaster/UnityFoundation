@@ -1,4 +1,14 @@
 namespace UnityFoundation.Services
 {
-    public record GameStateChangedEvent(GameState From, GameState To);
+    public struct GameStateChangedEvent
+    {
+        public GameState From;
+        public GameState To;
+
+        public GameStateChangedEvent(GameState from, GameState to)
+        {
+            From = from;
+            To = to;
+        }
+    }
 }
