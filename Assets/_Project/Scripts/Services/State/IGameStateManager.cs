@@ -6,7 +6,7 @@ namespace UnityFoundation.Services
     public interface IGameStateManager : IService
     {
         GameState CurrentState { get; }
-        event Action<GameState> OnStateChanged;
-        void TransitionTo(GameState state);
+        event Action<GameState, GameState> OnStateChanged;
+        void TransitionTo(GameState newState);
     }
 }

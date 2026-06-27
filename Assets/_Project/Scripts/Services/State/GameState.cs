@@ -2,7 +2,7 @@ namespace UnityFoundation.Services
 {
     public enum GameState
     {
-        Menu,
+        MainMenu,
         Loading,
         Gameplay,
         Paused,
