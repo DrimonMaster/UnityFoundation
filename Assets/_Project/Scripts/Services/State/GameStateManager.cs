@@ -15,7 +15,7 @@ namespace UnityFoundation.Services
         public void Initialize()
         {
             _eventBus = ServiceLocator.Get<IEventBus>();
-            CurrentState = GameState.MainMenu;
+            CurrentState = GameState.Loading;
             IsReady = true;
             "[Lifecycle] GameStateManager initialized".Log(LogCategory.Lifecycle);
         }
