@@ -2,7 +2,7 @@
     "name": "UnityFoundation.Simulation.Editor",
     "rootNamespace": "UnityFoundation.Editor",
     "references": [
-        "UnityFoundation.Simulation"
+        "GUID:7e1091207e2c22546a0096a4f7ed59d3"
     ],
     "includePlatforms": [
         "Editor"

@@ -833,10 +833,10 @@ PlayerSettings:
   webWasm2023: 0
   webEnableSubmoduleStrippingCompatibility: 0
   scriptingDefineSymbols:
-    Android: ENABLE_LOG
-    iPhone: ENABLE_LOG
+    Android: ENABLE_LOG;HEADLESS_SIM
+    iPhone: ENABLE_LOG;HEADLESS_SIM
     Standalone: ENABLE_LOG;HEADLESS_SIM
-    WebGL: ENABLE_LOG
+    WebGL: ENABLE_LOG;HEADLESS_SIM
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
