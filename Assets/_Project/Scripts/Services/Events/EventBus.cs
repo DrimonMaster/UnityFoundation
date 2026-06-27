@@ -6,7 +6,7 @@ namespace UnityFoundation.Services
 {
     public class EventBus : IEventBus
     {
-        private readonly Dictionary<Type, Delegate> _handlers = new();
+        private readonly Dictionary<Type, List<Delegate>> _handlers = new();
 
         public InitPriority Priority => InitPriority.Critical;
         public bool IsReady { get; private set; }
@@ -24,22 +24,45 @@ namespace UnityFoundation.Services
             IsReady = false;
         }
 
-        public void Publish<T>(T evt) where T : struct
+        public IDisposable Subscribe<T>(Action<T> handler)
         {
-            if (_handlers.TryGetValue(typeof(T), out var del))
-                ((Action<T>)del)?.Invoke(evt);
+            var type = typeof(T);
+            if (!_handlers.TryGetValue(type, out var list))
+            {
+                list = new List<Delegate>();
+                _handlers[type] = list;
+            }
+            list.Add(handler);
+            return new SubscriptionToken(() => Unsubscribe<T>(handler));
         }
 
-        public void Subscribe<T>(Action<T> handler) where T : struct
+        public void Unsubscribe<T>(Action<T> handler)
         {
-            _handlers.TryGetValue(typeof(T), out var existing);
-            _handlers[typeof(T)] = (Action<T>)existing + handler;
+            if (_handlers.TryGetValue(typeof(T), out var list))
+                list.Remove(handler);
         }
 
-        public void Unsubscribe<T>(Action<T> handler) where T : struct
+        public void Publish<T>(T eventData)
         {
-            if (_handlers.TryGetValue(typeof(T), out var existing))
-                _handlers[typeof(T)] = (Action<T>)existing - handler;
+            $"Event published: {typeof(T).Name}".Log(LogCategory.Event);
+            if (!_handlers.TryGetValue(typeof(T), out var list)) return;
+            foreach (var handler in list.ToArray())
+                ((Action<T>)handler).Invoke(eventData);
+        }
+
+        private sealed class SubscriptionToken : IDisposable
+        {
+            private readonly Action _unsubscribe;
+            private bool _disposed;
+
+            public SubscriptionToken(Action unsubscribe) => _unsubscribe = unsubscribe;
+
+            public void Dispose()
+            {
+                if (_disposed) return;
+                _disposed = true;
+                _unsubscribe();
+            }
         }
     }
 }
