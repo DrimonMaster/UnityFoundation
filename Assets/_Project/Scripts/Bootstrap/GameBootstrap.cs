@@ -39,7 +39,7 @@ namespace UnityFoundation.Bootstrap
             Add<ICrashReporter>(new CrashReporter());
             Add<ILogService>(new LogService());
             Add<IEventBus>(new EventBus());
-            Add<IDataService>(new DataService());
+            Add<IDataService>(new JsonDataService());
             Add<IGameStateManager>(new GameStateManager());
             Add<INetworkService>(new NetworkService());
             Add<IUIService>(new UIService());

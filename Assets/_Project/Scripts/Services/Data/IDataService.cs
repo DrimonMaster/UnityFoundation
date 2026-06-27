@@ -1,10 +1,13 @@
+using System.Threading.Tasks;
 using UnityFoundation.Core;
 
 namespace UnityFoundation.Services
 {
     public interface IDataService : IAsyncService
     {
-        bool TryLoad<T>(string key, out T data) where T : class;
-        void Save<T>(string key, T data) where T : class;
+        Task<T> LoadAsync<T>(string key) where T : class, new();
+        Task SaveAsync<T>(string key, T data) where T : class;
+        bool HasKey(string key);
+        void DeleteKey(string key);
     }
 }
