@@ -1,32 +1,58 @@
 name: Unity Activation
 
+# game-ci v4 activation guide: https://game.ci/docs/github/activation
+#
+# Personal license  — add secrets: UNITY_LICENSE (contents of .ulf), UNITY_EMAIL, UNITY_PASSWORD
+#   To get a .ulf: open Unity Hub → Preferences → License Management → Activate New License
+#   then copy the file from:
+#     Windows : C:\ProgramData\Unity\Unity_lic.ulf
+#     macOS   : /Library/Application Support/Unity/Unity_lic.ulf
+#     Linux   : ~/.local/share/unity3d/Unity/Unity_lic.ulf
+#
+# Professional license — add secrets: UNITY_SERIAL, UNITY_EMAIL, UNITY_PASSWORD
+#   UNITY_SERIAL format: XX-XXXX-XXXX-XXXX-XXXX-XXXX (from https://id.unity.com/subscriptions)
+#
+# Run this workflow once to verify credentials. After the job succeeds the
+# license is active for the duration of test.yml runs.
+
 on:
   workflow_dispatch:
+    inputs:
+      license_type:
+        description: License type
+        required: true
+        default: personal
+        type: choice
+        options:
+          - personal
+          - professional
 
 jobs:
   activation:
-    name: Request Activation File
+    name: Activate Unity License
     runs-on: ubuntu-latest
 
     steps:
-      - name: Request Manual Activation File
-        uses: game-ci/unity-request-activation-file@v2
-        id: getalf
-
-      - name: Upload .alf Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Unity_v${{ steps.getalf.outputs.unityVersion }}.alf
-          path: ${{ steps.getalf.outputs.filePath }}
-
-      - name: Activate Unity License
+      - name: Activate Unity (personal)
+        if: inputs.license_type == 'personal'
         uses: game-ci/unity-activate@v2
         env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
-      - name: Upload .ulf Artifact
+      - name: Activate Unity (professional)
+        if: inputs.license_type == 'professional'
+        uses: game-ci/unity-activate@v2
+        env:
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+
+      - name: Upload .ulf artifact (if generated)
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: Unity_v${{ steps.getalf.outputs.unityVersion }}_Professional.ulf
-          path: Unity_v${{ steps.getalf.outputs.unityVersion }}_Professional.ulf
+          name: Unity_v${{ inputs.license_type }}_license
+          path: Unity_*.ulf
+          if-no-files-found: ignore
