@@ -2,6 +2,10 @@
 
 Universal Unity 6 game architecture template based on a **ServiceLocator** pattern — no DI framework, no magic, just clean C#.
 
+- **ServiceLocator pattern** — no DI framework. Easier to remove than to add; zero reflection overhead; every dependency is an explicit `ServiceLocator.Get<T>()` call you can trace in one step.
+- **8 production-ready services** with clean interfaces and stub implementations — drop in real backends without touching call-sites.
+- **Built-in LogSystem** with per-category filtering, crash reporting, and full release-build stripping via the `ENABLE_LOG` scripting define.
+
 ## Architecture
 
 ```
@@ -48,6 +52,26 @@ CrashReporter → LogService → EventBus → DataService
 | `Overlay` | PauseScreen, GameOverScreen | Stacks on top; Pop removes top |
 | `HUD` | HUDScreen | Always visible; immune to HideAll |
 | `System` | LoadingScreen | Above everything; immune to HideAll |
+
+## Architecture Decisions
+
+**ServiceLocator over Zenject / Extenject**
+DI containers introduce attribute-driven wiring, reflection at startup, and a framework you can't delete. ServiceLocator is 40 lines of C# — readable, debuggable, and replaceable. The trade-off is that dependencies aren't enforced by the constructor, but for a single-executable game with a known boot order that's an acceptable cost.
+
+**`ILogService` + `ICrashReporter` as two separate services**
+Logging and crash reporting have different lifecycles. `CrashReporter` must be first in the bootstrap order so it can catch exceptions thrown during `LogService` construction. If they were merged, a log-init failure would be silently swallowed. Separation also lets you swap crash backends (Datadog, Firebase) without touching the log pipeline.
+
+**`IAsyncService` as opt-in, not the base interface**
+Only services that genuinely need async initialisation (data load, network handshake) implement `IAsyncService`. Making it universal would force every service to return a `Task`, adding noise and risk of accidental `await` omissions. The bootstrap sequences Critical, Important, and Optional services independently, so sync services pay zero async cost.
+
+**`CrashReporter` pending queue pattern**
+Exceptions can be thrown before `LogService` finishes initialising — e.g. in a static constructor or a `Resources.Load` call during service construction. The pending queue absorbs those reports and replays them on `Initialize()`, so no crash is silently lost even in the earliest frames.
+
+**`ScreenLayer` enum with 4 separate Canvas objects**
+A single Canvas with `sibling index` tricks breaks the moment any screen dynamically creates children. Four Canvases with fixed `sortingOrder` (0 / 10 / 20 / 30) give guaranteed z-order with no code to maintain. `HideAll` can safely skip HUD and System layers without inspecting individual screens. Each Canvas is `DontDestroyOnLoad` so UI survives scene transitions.
+
+**`EventBus` with priority ordering and `IDisposable` tokens**
+Priority ordering lets audio react before UI, and UI before analytics — without coupling those systems. `IDisposable` tokens replace manual `Unsubscribe` calls: store the token in a field, call `Dispose()` in `OnDestroy`, and the subscription is gone. The snapshot-before-iterate pattern (`list.ToArray()`) allows handlers to unsubscribe themselves without invalidating the iterator.
 
 ## How to use
 
