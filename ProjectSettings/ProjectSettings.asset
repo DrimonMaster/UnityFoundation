@@ -835,7 +835,7 @@ PlayerSettings:
   scriptingDefineSymbols:
     Android: ENABLE_LOG
     iPhone: ENABLE_LOG
-    Standalone: ENABLE_LOG
+    Standalone: ENABLE_LOG;HEADLESS_SIM
     WebGL: ENABLE_LOG
   additionalCompilerArguments: {}
   platformArchitecture: {}
