@@ -15,6 +15,7 @@ namespace UnityFoundation.Bootstrap
 
         private async void Start()
         {
+            DontDestroyOnLoad(gameObject);
             try
             {
                 "Registering services...".Log(LogCategory.Bootstrap);
