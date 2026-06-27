@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 35b80750a4a263c4498f3ab6d8d31a17, type: 3}
   m_Name: LogSettings
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: UnityFoundation.Services::UnityFoundation.Services.LogSettings
   _categories:
   - Category: 0
     EnabledInEditor: 1
